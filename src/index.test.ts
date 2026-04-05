@@ -34,7 +34,7 @@ describe('legacyPassThrough', () => {
     it('ignores empty strings and uses valid entries', () => {
       const plugin = legacyPassThrough({ libs: ['', 'my-lib', ''] })
       const resolveId = getResolveId(plugin)
-      expect(resolveId.call({} as never, 'my-lib/utils', undefined, opts)).toEqual({ id: 'my-lib/utils', external: true })
+      expect(resolveId.call({} as never, 'my-lib/utils.js', undefined, opts)).toEqual({ id: 'my-lib/utils.js', external: true })
     })
   })
 
@@ -54,21 +54,28 @@ describe('legacyPassThrough', () => {
     it('marks a matching lib as external', () => {
       const plugin = legacyPassThrough({ libs: ['my-lib'] })
       const resolveId = getResolveId(plugin)
-      const result = resolveId.call({} as never, 'my-lib/utils', undefined, opts)
-      expect(result).toEqual({ id: 'my-lib/utils', external: true })
+      const result = resolveId.call({} as never, 'my-lib/utils.js', undefined, opts)
+      expect(result).toEqual({ id: 'my-lib/utils.js', external: true })
     })
 
     it('marks deep paths as external', () => {
       const plugin = legacyPassThrough({ libs: ['my-lib'] })
       const resolveId = getResolveId(plugin)
-      const result = resolveId.call({} as never, 'my-lib/components/Button', undefined, opts)
-      expect(result).toEqual({ id: 'my-lib/components/Button', external: true })
+      const result = resolveId.call({} as never, 'my-lib/components/Button.js', undefined, opts)
+      expect(result).toEqual({ id: 'my-lib/components/Button.js', external: true })
+    })
+
+    it('returns null for non-.js sources', () => {
+      const plugin = legacyPassThrough({ libs: ['my-lib'] })
+      const resolveId = getResolveId(plugin)
+      expect(resolveId.call({} as never, 'my-lib/utils', undefined, opts)).toBeNull()
+      expect(resolveId.call({} as never, 'my-lib/utils.ts', undefined, opts)).toBeNull()
     })
 
     it('returns null for non-matching sources', () => {
       const plugin = legacyPassThrough({ libs: ['my-lib'] })
       const resolveId = getResolveId(plugin)
-      const result = resolveId.call({} as never, 'other-lib/utils', undefined, opts)
+      const result = resolveId.call({} as never, 'other-lib/utils.js', undefined, opts)
       expect(result).toBeNull()
     })
 
@@ -82,17 +89,17 @@ describe('legacyPassThrough', () => {
     it('does not match partial lib name prefix', () => {
       const plugin = legacyPassThrough({ libs: ['my-lib'] })
       const resolveId = getResolveId(plugin)
-      const result = resolveId.call({} as never, 'my-lib-extra/utils', undefined, opts)
+      const result = resolveId.call({} as never, 'my-lib-extra/utils.js', undefined, opts)
       expect(result).toBeNull()
     })
 
     it('handles multiple libs', () => {
       const plugin = legacyPassThrough({ libs: ['lib-a', 'lib-b', 'lib-c'] })
       const resolveId = getResolveId(plugin)
-      expect(resolveId.call({} as never, 'lib-a/index', undefined, opts)).toEqual({ id: 'lib-a/index', external: true })
-      expect(resolveId.call({} as never, 'lib-b/utils', undefined, opts)).toEqual({ id: 'lib-b/utils', external: true })
-      expect(resolveId.call({} as never, 'lib-c/foo/bar', undefined, opts)).toEqual({ id: 'lib-c/foo/bar', external: true })
-      expect(resolveId.call({} as never, 'lib-d/index', undefined, opts)).toBeNull()
+      expect(resolveId.call({} as never, 'lib-a/index.js', undefined, opts)).toEqual({ id: 'lib-a/index.js', external: true })
+      expect(resolveId.call({} as never, 'lib-b/utils.js', undefined, opts)).toEqual({ id: 'lib-b/utils.js', external: true })
+      expect(resolveId.call({} as never, 'lib-c/foo/bar.js', undefined, opts)).toEqual({ id: 'lib-c/foo/bar.js', external: true })
+      expect(resolveId.call({} as never, 'lib-d/index.js', undefined, opts)).toBeNull()
     })
   })
 
@@ -108,16 +115,16 @@ describe('legacyPassThrough', () => {
     it('logs when showLog is true and source matches', () => {
       const plugin = legacyPassThrough({ libs: ['my-lib'], showLog: true })
       const resolveId = getResolveId(plugin)
-      resolveId.call({} as never, 'my-lib/utils', undefined, opts)
+      resolveId.call({} as never, 'my-lib/utils.js', undefined, opts)
       expect(console.log).toHaveBeenCalledWith(
-        '[vite-legacy-pass-through] Resolving: my-lib/utils'
+        '[vite-legacy-pass-through] Resolving: my-lib/utils.js'
       )
     })
 
     it('does not log when showLog is false', () => {
       const plugin = legacyPassThrough({ libs: ['my-lib'], showLog: false })
       const resolveId = getResolveId(plugin)
-      resolveId.call({} as never, 'my-lib/utils', undefined, opts)
+      resolveId.call({} as never, 'my-lib/utils.js', undefined, opts)
       expect(console.log).not.toHaveBeenCalled()
     })
 
