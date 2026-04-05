@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/ElJijuna/vite-legacy-pass-through/compare/v1.1.0...v1.2.0) (2026-04-05)
+
+
+### Features
+
+* add apply option to control when the plugin runs ([d3a998c](https://github.com/ElJijuna/vite-legacy-pass-through/commit/d3a998c83ba5a11b6d8b5731009f8a10569d11cb))
+
 # [1.1.0](https://github.com/ElJijuna/vite-legacy-pass-through/compare/v1.0.0...v1.1.0) (2026-04-05)
 
 
