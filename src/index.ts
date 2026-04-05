@@ -38,6 +38,17 @@ export interface LegacyPassThroughOptions {
   excludeExtensions?: string[]
 
   /**
+   * Controls when the plugin is applied.
+   *
+   * - `'build'` — only during `vite build` (default). Prevents the plugin from
+   *   interfering with dev tools that use Vite's dev server, such as Storybook.
+   * - `'serve'` — only during `vite dev` / `vite preview`.
+   *
+   * @defaultValue `'build'`
+   */
+  apply?: 'build' | 'serve'
+
+  /**
    * When `true`, logs each resolved import path to the console.
    *
    * Useful during development to verify which imports are being bypassed.
@@ -94,7 +105,7 @@ export const DEFAULT_EXCLUDE_EXTENSIONS = new Set([
   '.json', '.html',
 ])
 
-export function legacyPassThrough({ libs, excludeExtensions, showLog }: LegacyPassThroughOptions = { libs: [] }): Plugin {
+export function legacyPassThrough({ libs, excludeExtensions, apply = 'build', showLog }: LegacyPassThroughOptions = { libs: [] }): Plugin {
   const validLibs = libs.filter(lib => lib.trim() !== '')
 
   if (!validLibs.length) {
@@ -107,6 +118,7 @@ export function legacyPassThrough({ libs, excludeExtensions, showLog }: LegacyPa
   return {
     name: 'vite-legacy-pass-through',
     enforce: 'pre',
+    apply,
     resolveId(source) {
       const dotIndex = source.lastIndexOf('.')
       if (dotIndex !== -1 && skipExtensions.has(source.slice(dotIndex))) {

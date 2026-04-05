@@ -50,6 +50,23 @@ describe('legacyPassThrough', () => {
     })
   })
 
+  describe('apply', () => {
+    it('defaults to build', () => {
+      const plugin = legacyPassThrough({ libs: ['my-lib'] })
+      expect(plugin.apply).toBe('build')
+    })
+
+    it('accepts serve', () => {
+      const plugin = legacyPassThrough({ libs: ['my-lib'], apply: 'serve' })
+      expect(plugin.apply).toBe('serve')
+    })
+
+    it('accepts build explicitly', () => {
+      const plugin = legacyPassThrough({ libs: ['my-lib'], apply: 'build' })
+      expect(plugin.apply).toBe('build')
+    })
+  })
+
   describe('resolveId', () => {
     it('marks a matching lib as external', () => {
       const plugin = legacyPassThrough({ libs: ['my-lib'] })

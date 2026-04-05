@@ -100,6 +100,15 @@ Output when `showLog: true`:
 [vite-legacy-pass-through] Resolving: lib-legacy/utils/format
 ```
 
+Running in both build and dev (e.g. if you need it in Storybook too):
+
+```ts
+legacyPassThrough({
+  libs: ['lib-legacy'],
+  apply: 'serve', // or omit for the default 'build'
+})
+```
+
 Overriding the excluded extensions (replaces the default list entirely):
 
 ```ts
@@ -119,6 +128,7 @@ legacyPassThrough({
 | Option | Type | Required | Default | Description |
 |---|---|---|---|---|
 | `libs` | `string[]` | Yes | — | List of library names to mark as external. Empty strings are ignored. Must have at least one valid entry. |
+| `apply` | `'build' \| 'serve'` | No | `'build'` | When to apply the plugin. Defaults to `'build'` to avoid interfering with dev tools like Storybook. |
 | `excludeExtensions` | `string[]` | No | See below | File extensions to skip — imports ending with these are left for Vite to handle normally. Replaces the default list when provided. |
 | `showLog` | `boolean` | No | `false` | Logs each resolved import to the console. |
 
