@@ -83,7 +83,7 @@ export function legacyPassThrough({ libs, showLog }: LegacyPassThroughOptions = 
     name: 'vite-legacy-pass-through',
     enforce: 'pre',
     resolveId(source) {
-      if (prefixes.some(prefix => source.startsWith(prefix))) {
+      if (source.endsWith('.js') && prefixes.some(prefix => source.startsWith(prefix))) {
         if (showLog) {
           console.log(`[vite-legacy-pass-through] Resolving: ${source}`)
         }
