@@ -1,0 +1,63 @@
+{
+  "name": "vite-legacy-pass-through",
+  "version": "1.0.0",
+  "description": "Vite plugin to pass through legacy assets without transformation",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "vite",
+    "plugin",
+    "legacy",
+    "pass-through",
+    "rolldown",
+    "external",
+    "prop-types"
+  ],
+  "author": "el_jijuna",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/el_jijuna/vite-legacy-pass-through.git"
+  },
+  "bugs": {
+    "url": "https://github.com/el_jijuna/vite-legacy-pass-through/issues"
+  },
+  "homepage": "https://github.com/el_jijuna/vite-legacy-pass-through#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "vite": "^8.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "vite": "^8.0.3",
+    "vitest": "^4.1.2"
+  }
+}

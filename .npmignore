@@ -1,0 +1,5 @@
+src/
+.github/
+tsup.config.ts
+tsconfig.json
+*.map
