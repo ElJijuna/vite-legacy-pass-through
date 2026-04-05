@@ -21,6 +21,23 @@ export interface LegacyPassThroughOptions {
   libs: string[]
 
   /**
+   * List of file extensions to exclude from pass-through.
+   *
+   * Imports whose path ends with any of these extensions are ignored by the
+   * plugin and left for Vite to handle normally (e.g. CSS, assets).
+   *
+   * Extensions must include the leading dot.
+   *
+   * @defaultValue `['.css', '.scss', '.sass', '.less', '.styl', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.woff', '.woff2', '.ttf', '.eot', '.json', '.html']`
+   *
+   * @example
+   * ```ts
+   * excludeExtensions: ['.css', '.svg']
+   * ```
+   */
+  excludeExtensions?: string[]
+
+  /**
    * When `true`, logs each resolved import path to the console.
    *
    * Useful during development to verify which imports are being bypassed.
@@ -70,7 +87,14 @@ export interface LegacyPassThroughOptions {
  * })
  * ```
  */
-export function legacyPassThrough({ libs, showLog }: LegacyPassThroughOptions = { libs: [] }): Plugin {
+export const DEFAULT_EXCLUDE_EXTENSIONS = new Set([
+  '.css', '.scss', '.sass', '.less', '.styl',
+  '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp',
+  '.woff', '.woff2', '.ttf', '.eot',
+  '.json', '.html',
+])
+
+export function legacyPassThrough({ libs, excludeExtensions, showLog }: LegacyPassThroughOptions = { libs: [] }): Plugin {
   const validLibs = libs.filter(lib => lib.trim() !== '')
 
   if (!validLibs.length) {
@@ -78,11 +102,17 @@ export function legacyPassThrough({ libs, showLog }: LegacyPassThroughOptions = 
   }
 
   const prefixes = validLibs.map(lib => `${lib}/`)
+  const skipExtensions = excludeExtensions ? new Set(excludeExtensions) : DEFAULT_EXCLUDE_EXTENSIONS
 
   return {
     name: 'vite-legacy-pass-through',
     enforce: 'pre',
     resolveId(source) {
+      const dotIndex = source.lastIndexOf('.')
+      if (dotIndex !== -1 && skipExtensions.has(source.slice(dotIndex))) {
+        return null
+      }
+
       if (prefixes.some(prefix => source.startsWith(prefix))) {
         if (showLog) {
           console.log(`[vite-legacy-pass-through] Resolving: ${source}`)

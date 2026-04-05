@@ -100,6 +100,18 @@ Output when `showLog: true`:
 [vite-legacy-pass-through] Resolving: lib-legacy/utils/format
 ```
 
+Overriding the excluded extensions (replaces the default list entirely):
+
+```ts
+import { legacyPassThrough, DEFAULT_EXCLUDE_EXTENSIONS } from 'vite-legacy-pass-through'
+
+legacyPassThrough({
+  libs: ['lib-legacy'],
+  // extend the default list
+  excludeExtensions: [...DEFAULT_EXCLUDE_EXTENSIONS, '.yaml'],
+})
+```
+
 ---
 
 ## ⚙️ Options
@@ -107,7 +119,21 @@ Output when `showLog: true`:
 | Option | Type | Required | Default | Description |
 |---|---|---|---|---|
 | `libs` | `string[]` | Yes | — | List of library names to mark as external. Empty strings are ignored. Must have at least one valid entry. |
+| `excludeExtensions` | `string[]` | No | See below | File extensions to skip — imports ending with these are left for Vite to handle normally. Replaces the default list when provided. |
 | `showLog` | `boolean` | No | `false` | Logs each resolved import to the console. |
+
+### Default excluded extensions
+
+Imports from a matched lib that end with any of these extensions are **not** marked as external:
+
+```
+.css .scss .sass .less .styl
+.png .jpg .jpeg .gif .svg .webp
+.woff .woff2 .ttf .eot
+.json .html
+```
+
+To disable exclusions entirely, pass `excludeExtensions: []`.
 
 ---
 
