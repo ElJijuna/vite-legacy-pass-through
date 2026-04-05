@@ -38,16 +38,16 @@
     "external",
     "prop-types"
   ],
-  "author": "el_jijuna",
+  "author": "pilmee",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/el_jijuna/vite-legacy-pass-through.git"
+    "url": "https://github.com/ElJijuna/vite-legacy-pass-through.git"
   },
   "bugs": {
-    "url": "https://github.com/el_jijuna/vite-legacy-pass-through/issues"
+    "url": "https://github.com/ElJijuna/vite-legacy-pass-through/issues"
   },
-  "homepage": "https://github.com/el_jijuna/vite-legacy-pass-through#readme",
+  "homepage": "https://eljijuna.github.io/vite-legacy-pass-through",
   "engines": {
     "node": ">=18"
   },
@@ -55,6 +55,13 @@
     "vite": "^8.0.0"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.6",
+    "@semantic-release/npm": "^12.0.2",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "semantic-release": "^24.2.9",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3",
     "vite": "^8.0.3",

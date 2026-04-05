@@ -1,5 +1,10 @@
 # vite-legacy-pass-through ⚡
 
+[![npm version](https://img.shields.io/npm/v/vite-legacy-pass-through?color=crimson&label=npm)](https://www.npmjs.com/package/vite-legacy-pass-through)
+[![npm downloads](https://img.shields.io/npm/dm/vite-legacy-pass-through?color=orange)](https://www.npmjs.com/package/vite-legacy-pass-through)
+[![license](https://img.shields.io/npm/l/vite-legacy-pass-through?color=blue)](https://github.com/ElJijuna/vite-legacy-pass-through/blob/main/LICENSE)
+[![CI](https://github.com/ElJijuna/vite-legacy-pass-through/actions/workflows/publish.yml/badge.svg)](https://github.com/ElJijuna/vite-legacy-pass-through/actions/workflows/publish.yml)
+
 > A Vite plugin that marks legacy libraries as external, preventing Rolldown from bundling them and causing CommonJS interop errors at runtime.
 
 ---
