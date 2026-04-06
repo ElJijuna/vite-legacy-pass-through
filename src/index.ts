@@ -68,9 +68,11 @@ export interface LegacyPassThroughOptions {
  * Vite plugin that marks legacy libraries as external, preventing Rolldown
  * from bundling them and causing CommonJS interop errors at runtime.
  *
- * The plugin hooks into the `resolveId` phase with `enforce: 'pre'` and marks
- * any import whose path starts with `<lib>/` as external. Rolldown then skips
- * those imports entirely, leaving them as bare import statements in the output.
+ * The plugin hooks into both the `options` phase (to register externals with
+ * Rolldown natively, covering transitive imports inside node_modules) and the
+ * `resolveId` phase with `enforce: 'pre'` (to catch any remaining direct
+ * imports that bypass the options-level check). Rolldown then skips those
+ * imports entirely, leaving them as bare import statements in the output.
  *
  * @remarks
  * Rolldown does **not** recommend marking packages as external in library
@@ -115,20 +117,49 @@ export function legacyPassThrough({ libs, excludeExtensions, apply = 'build', sh
   const prefixes = validLibs.map(lib => `${lib}/`)
   const skipExtensions = excludeExtensions ? new Set(excludeExtensions) : DEFAULT_EXCLUDE_EXTENSIONS
 
+  function isPassThrough(id: string): boolean {
+    const dotIndex = id.lastIndexOf('.')
+    if (dotIndex !== -1 && skipExtensions.has(id.slice(dotIndex))) return false
+    return prefixes.some(prefix => id.startsWith(prefix))
+  }
+
   return {
     name: 'vite-legacy-pass-through',
     enforce: 'pre',
     apply,
-    resolveId(source) {
-      const dotIndex = source.lastIndexOf('.')
-      if (dotIndex !== -1 && skipExtensions.has(source.slice(dotIndex))) {
-        return null
+    /**
+     * Register externals at the Rolldown options level so that transitive
+     * imports inside node_modules are also intercepted — Rolldown's native
+     * resolver may bypass `resolveId` plugin hooks for deps-of-deps.
+     */
+    options(rollupOptions) {
+      const existingExternal = rollupOptions.external
+      return {
+        external(id: string, parentId: string | undefined, isResolved: boolean): boolean {
+          if (!isResolved && isPassThrough(id)) {
+            if (showLog) {
+              console.log(`[vite-legacy-pass-through] Resolving: ${id}`)
+            }
+            return true
+          }
+          if (!existingExternal) return false
+          if (typeof existingExternal === 'function') {
+            return !!(existingExternal as (id: string, importer: string | undefined, isResolved: boolean) => boolean | null | void)(id, parentId, isResolved)
+          }
+          const exts = Array.isArray(existingExternal) ? existingExternal : [existingExternal]
+          return exts.some((ext: string | RegExp) =>
+            typeof ext === 'string' ? id === ext : (ext as RegExp).test(id)
+          )
+        },
       }
-
-      if (prefixes.some(prefix => source.startsWith(prefix))) {
-        if (showLog) {
-          console.log(`[vite-legacy-pass-through] Resolving: ${source}`)
-        }
+    },
+    /**
+     * Fallback resolveId hook for imports that reach the plugin pipeline
+     * directly (e.g. not intercepted by the options-level external check).
+     * Logging is handled in `options` to avoid double-logging.
+     */
+    resolveId(source: string) {
+      if (isPassThrough(source)) {
         return { id: source, external: true }
       }
       return null
