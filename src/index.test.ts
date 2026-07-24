@@ -55,6 +55,30 @@ describe('legacyPassThrough', () => {
         external: true,
       });
     });
+
+    it('rejects a non-string library entry', () => {
+      expect(() => legacyPassThrough({ libs: ['my-lib', 42] } as never)).toThrow(
+        'The "libs" option must be an array of strings.',
+      );
+    });
+
+    it('rejects an invalid excluded extension', () => {
+      expect(() => legacyPassThrough({ libs: ['my-lib'], excludeExtensions: ['css'] })).toThrow(
+        'The "excludeExtensions" option must be an array of extensions.',
+      );
+    });
+
+    it('rejects invalid boolean and apply options at runtime', () => {
+      expect(() => legacyPassThrough({ libs: ['my-lib'], apply: 'preview' } as never)).toThrow(
+        'The "apply" option must be "build" or "serve".',
+      );
+      expect(() =>
+        legacyPassThrough({ libs: ['my-lib'], matchBareImports: 'yes' } as never),
+      ).toThrow('The "matchBareImports" option must be a boolean.');
+      expect(() => legacyPassThrough({ libs: ['my-lib'], showLog: 1 } as never)).toThrow(
+        'The "showLog" option must be a boolean.',
+      );
+    });
   });
 
   describe('plugin metadata', () => {
@@ -124,6 +148,16 @@ describe('legacyPassThrough', () => {
       expect(result).toBeNull();
     });
 
+    it('matches exact bare imports when explicitly enabled', () => {
+      const plugin = legacyPassThrough({ libs: ['my-lib'], matchBareImports: true });
+      const resolveId = getResolveId(plugin);
+
+      expect(resolveId.call({} as never, 'my-lib', undefined, opts)).toEqual({
+        id: 'my-lib',
+        external: true,
+      });
+    });
+
     it('does not match partial lib name prefix', () => {
       const plugin = legacyPassThrough({ libs: ['my-lib'] });
       const resolveId = getResolveId(plugin);
@@ -188,6 +222,13 @@ describe('legacyPassThrough', () => {
         id: 'my-lib/assets/icon.svg',
         external: true,
       });
+    });
+
+    it('normalizes custom excluded extensions', () => {
+      const plugin = legacyPassThrough({ libs: ['my-lib'], excludeExtensions: [' .CSS '] });
+      const resolveId = getResolveId(plugin);
+
+      expect(resolveId.call({} as never, 'my-lib/styles/button.css', undefined, opts)).toBeNull();
     });
 
     it('marks matching import as external when extension is not excluded', () => {

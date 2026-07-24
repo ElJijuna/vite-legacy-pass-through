@@ -1,0 +1,27 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "extends": "./node_modules/super-configs/typedoc.json",
+  "entryPoints": ["src/index.ts"],
+  "out": "docs/api",
+  "readme": "README.md",
+  "exclude": ["**/*.test.ts", "**/*.spec.ts", "**/test/**"],
+  "highlightLanguages": [
+    "bash",
+    "console",
+    "css",
+    "html",
+    "javascript",
+    "json",
+    "jsonc",
+    "json5",
+    "mermaid",
+    "tsx",
+    "typescript",
+    "yaml"
+  ],
+  "externalSymbolLinkMappings": {
+    "vite": {
+      "Plugin": "https://vite.dev/guide/api-plugin.html#plugin-api"
+    }
+  }
+}

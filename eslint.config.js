@@ -6,7 +6,7 @@ export default [
     runtime: 'node',
     language: 'ts',
     typeChecked: true,
-    ignores: ['dist/**', 'coverage/**', 'node_modules/**', 'tsup.config.ts'],
+    ignores: ['dist/**', 'coverage/**', 'node_modules/**', 'tsup.config.ts', 'vitest.config.ts'],
   }),
   ...eslintVitest,
 ];

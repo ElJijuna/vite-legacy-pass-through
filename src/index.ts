@@ -8,8 +8,8 @@ export interface LegacyPassThroughOptions {
    * List of library names to mark as external.
    *
    * Each entry must match the package name exactly as it appears in import
-   * statements. Only subpath imports (`lib/...`) are matched — bare imports
-   * (`lib` without a subpath) are left untouched.
+   * statements. Subpath imports (`lib/...`) are always matched. Bare imports
+   * (`lib` without a subpath) require {@link matchBareImports}.
    *
    * Whitespace is trimmed and empty entries are ignored. At least one valid
    * entry is required.
@@ -37,6 +37,13 @@ export interface LegacyPassThroughOptions {
    * ```
    */
   excludeExtensions?: string[];
+
+  /**
+   * Also mark an exact, bare library import as external.
+   *
+   * @defaultValue `false`
+   */
+  matchBareImports?: boolean;
 
   /**
    * Controls when the plugin is applied.
@@ -81,6 +88,7 @@ export interface LegacyPassThroughOptions {
  *
  * @param options - Plugin configuration options.
  * @returns A Vite {@link Plugin} instance.
+ * @throws {TypeError} If an option has an invalid runtime value.
  * @throws {Error} If `libs` is empty or contains only empty strings.
  *
  * @example
@@ -119,9 +127,42 @@ export const DEFAULT_EXCLUDE_EXTENSIONS = new Set([
   '.html',
 ]);
 
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+
 export function legacyPassThrough(
-  { libs, excludeExtensions, apply = 'build', showLog }: LegacyPassThroughOptions = { libs: [] },
+  {
+    libs = [],
+    excludeExtensions,
+    apply = 'build',
+    matchBareImports = false,
+    showLog,
+  }: LegacyPassThroughOptions = { libs: [] },
 ): Plugin {
+  if (!isStringArray(libs)) {
+    throw new TypeError('The "libs" option must be an array of strings.');
+  }
+
+  if (
+    excludeExtensions !== undefined &&
+    (!isStringArray(excludeExtensions) ||
+      excludeExtensions.some((extension) => !extension.trim().startsWith('.')))
+  ) {
+    throw new TypeError('The "excludeExtensions" option must be an array of extensions.');
+  }
+
+  if (apply !== 'build' && apply !== 'serve') {
+    throw new TypeError('The "apply" option must be "build" or "serve".');
+  }
+
+  if (typeof matchBareImports !== 'boolean') {
+    throw new TypeError('The "matchBareImports" option must be a boolean.');
+  }
+
+  if (showLog !== undefined && typeof showLog !== 'boolean') {
+    throw new TypeError('The "showLog" option must be a boolean.');
+  }
+
   const validLibs = libs.map((lib) => lib.trim()).filter((lib) => lib.length > 0);
 
   if (!validLibs.length) {
@@ -131,8 +172,9 @@ export function legacyPassThrough(
   }
 
   const prefixes = validLibs.map((lib) => `${lib}/`);
+  const bareLibraries = new Set(validLibs);
   const skipExtensions = excludeExtensions
-    ? new Set(excludeExtensions)
+    ? new Set(excludeExtensions.map((extension) => extension.trim().toLowerCase()))
     : DEFAULT_EXCLUDE_EXTENSIONS;
 
   return {
@@ -140,14 +182,17 @@ export function legacyPassThrough(
     enforce: 'pre',
     apply,
     resolveId(source) {
-      const sourcePath = source.split(/[?#]/, 1)[0].toLowerCase();
+      const [sourcePath] = source.split(/[?#]/, 1);
       const dotIndex = sourcePath.lastIndexOf('.');
 
-      if (dotIndex !== -1 && skipExtensions.has(sourcePath.slice(dotIndex))) {
+      if (dotIndex !== -1 && skipExtensions.has(sourcePath.slice(dotIndex).toLowerCase())) {
         return null;
       }
 
-      if (prefixes.some((prefix) => source.startsWith(prefix))) {
+      if (
+        prefixes.some((prefix) => source.startsWith(prefix)) ||
+        (matchBareImports && bareLibraries.has(sourcePath))
+      ) {
         if (showLog) {
           console.log(`[vite-legacy-pass-through] Resolving: ${source}`);
         }
