@@ -1,3 +1,11 @@
+# [1.3.0](https://github.com/ElJijuna/vite-legacy-pass-through/compare/v1.2.0...v1.3.0) (2026-07-24)
+
+
+### Features
+
+* add test coverage command and improve legacyPassThrough plugin ([eac3e6f](https://github.com/ElJijuna/vite-legacy-pass-through/commit/eac3e6fba7ff286ff5a65665fe390f5fca64bc9b))
+* enhance legacyPassThrough plugin with validation and new options; add integration tests and documentation ([1ef9405](https://github.com/ElJijuna/vite-legacy-pass-through/commit/1ef94050e9fa04f4e2da0e78908bde483b14c503))
+
 # [1.2.0](https://github.com/ElJijuna/vite-legacy-pass-through/compare/v1.1.0...v1.2.0) (2026-04-05)
 
 
