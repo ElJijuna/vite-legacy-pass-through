@@ -45,6 +45,16 @@ describe('legacyPassThrough', () => {
         external: true,
       });
     });
+
+    it('trims library names before matching them', () => {
+      const plugin = legacyPassThrough({ libs: ['  my-lib  '] });
+      const resolveId = getResolveId(plugin);
+
+      expect(resolveId.call({} as never, 'my-lib/utils', undefined, opts)).toEqual({
+        id: 'my-lib/utils',
+        external: true,
+      });
+    });
   });
 
   describe('plugin metadata', () => {
@@ -150,6 +160,15 @@ describe('legacyPassThrough', () => {
       expect(resolveId.call({} as never, 'my-lib/styles/button.css', undefined, opts)).toBeNull();
     });
 
+    it('skips excluded extensions with a query or hash suffix', () => {
+      const plugin = legacyPassThrough({ libs: ['my-lib'] });
+      const resolveId = getResolveId(plugin);
+
+      expect(
+        resolveId.call({} as never, 'my-lib/styles/button.CSS?inline#theme', undefined, opts),
+      ).toBeNull();
+    });
+
     it('skips all DEFAULT_EXCLUDE_EXTENSIONS entries', () => {
       const plugin = legacyPassThrough({ libs: ['my-lib'] });
       const resolveId = getResolveId(plugin);
@@ -177,6 +196,16 @@ describe('legacyPassThrough', () => {
 
       expect(resolveId.call({} as never, 'my-lib/styles/button.css', undefined, opts)).toEqual({
         id: 'my-lib/styles/button.css',
+        external: true,
+      });
+    });
+
+    it('preserves a query suffix on an externalized JavaScript import', () => {
+      const plugin = legacyPassThrough({ libs: ['my-lib'] });
+      const resolveId = getResolveId(plugin);
+
+      expect(resolveId.call({} as never, 'my-lib/utils.js?raw', undefined, opts)).toEqual({
+        id: 'my-lib/utils.js?raw',
         external: true,
       });
     });

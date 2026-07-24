@@ -11,7 +11,8 @@ export interface LegacyPassThroughOptions {
    * statements. Only subpath imports (`lib/...`) are matched — bare imports
    * (`lib` without a subpath) are left untouched.
    *
-   * Empty strings are silently ignored. At least one valid entry is required.
+   * Whitespace is trimmed and empty entries are ignored. At least one valid
+   * entry is required.
    *
    * @example
    * ```ts
@@ -121,7 +122,7 @@ export const DEFAULT_EXCLUDE_EXTENSIONS = new Set([
 export function legacyPassThrough(
   { libs, excludeExtensions, apply = 'build', showLog }: LegacyPassThroughOptions = { libs: [] },
 ): Plugin {
-  const validLibs = libs.filter((lib) => lib.trim() !== '');
+  const validLibs = libs.map((lib) => lib.trim()).filter((lib) => lib.length > 0);
 
   if (!validLibs.length) {
     throw new Error(
@@ -139,9 +140,10 @@ export function legacyPassThrough(
     enforce: 'pre',
     apply,
     resolveId(source) {
-      const dotIndex = source.lastIndexOf('.');
+      const sourcePath = source.split(/[?#]/, 1)[0].toLowerCase();
+      const dotIndex = sourcePath.lastIndexOf('.');
 
-      if (dotIndex !== -1 && skipExtensions.has(source.slice(dotIndex))) {
+      if (dotIndex !== -1 && skipExtensions.has(sourcePath.slice(dotIndex))) {
         return null;
       }
 

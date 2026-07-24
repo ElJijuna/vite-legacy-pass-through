@@ -127,7 +127,7 @@ legacyPassThrough({
 
 | Option | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `libs` | `string[]` | Yes | — | List of library names to mark as external. Empty strings are ignored. Must have at least one valid entry. |
+| `libs` | `string[]` | Yes | — | List of library names to mark as external. Names are trimmed; empty entries are ignored. At least one valid entry is required. |
 | `apply` | `'build' \| 'serve'` | No | `'build'` | When to apply the plugin. Defaults to `'build'` to avoid interfering with dev tools like Storybook. |
 | `excludeExtensions` | `string[]` | No | See below | File extensions to skip — imports ending with these are left for Vite to handle normally. Replaces the default list when provided. |
 | `showLog` | `boolean` | No | `false` | Logs each resolved import to the console. |
@@ -144,6 +144,13 @@ Imports from a matched lib that end with any of these extensions are **not** mar
 ```
 
 To disable exclusions entirely, pass `excludeExtensions: []`.
+
+### Resolution details
+
+- A library is matched only when the import starts with its full name followed by `/`. This supports scoped packages such as `@scope/library/components/Button` and prevents matching `library-extra` when `library` is configured.
+- Bare imports such as `import 'library'` are intentionally left untouched.
+- The default extension exclusions are case-insensitive and still apply when an import includes a Vite query or fragment, such as `library/styles.css?inline`.
+- When an import is externalized, its original query or fragment is preserved.
 
 ---
 
@@ -176,6 +183,24 @@ import Button from 'lib-legacy/components/Button'
 
 - **Vite**: `^8.0.0`
 - **Node.js**: `>=20.19.0`
+
+## ✅ Verification and maintenance
+
+Install dependencies with `npm ci`, then use the following commands:
+
+| Command | Purpose |
+|---|---|
+| `npm run check` | Run ESLint, Biome, TypeScript, and the test suite. |
+| `npm run build` | Build ESM, CommonJS, and declaration outputs with tsup. |
+| `npm run test:coverage` | Run the test suite with V8 coverage. |
+| `npm run pack:check` | Preview the files that would be published to npm. |
+| `npm run audit` | Fail on high- or critical-severity dependency advisories. |
+
+The release workflow uses a clean, lockfile-based install, runs these quality and security checks, and validates the package contents before publishing. Dependency and GitHub Action updates are proposed weekly by Dependabot.
+
+## 🔒 Security
+
+See [SECURITY.md](./SECURITY.md) for supported versions and private vulnerability reporting instructions.
 
 ---
 
