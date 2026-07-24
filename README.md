@@ -175,7 +175,7 @@ import Button from 'lib-legacy/components/Button'
 ## 📋 Requirements
 
 - **Vite**: `^8.0.0`
-- **Node.js**: `>=18`
+- **Node.js**: `>=20.19.0`
 
 ---
 

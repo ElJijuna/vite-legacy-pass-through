@@ -1,4 +1,4 @@
-import type { Plugin } from 'vite'
+import type { Plugin } from 'vite';
 
 /**
  * Options for the {@link legacyPassThrough} plugin.
@@ -18,7 +18,7 @@ export interface LegacyPassThroughOptions {
    * libs: ['lib-legacy', 'another-old-lib']
    * ```
    */
-  libs: string[]
+  libs: string[];
 
   /**
    * List of file extensions to exclude from pass-through.
@@ -35,7 +35,7 @@ export interface LegacyPassThroughOptions {
    * excludeExtensions: ['.css', '.svg']
    * ```
    */
-  excludeExtensions?: string[]
+  excludeExtensions?: string[];
 
   /**
    * Controls when the plugin is applied.
@@ -46,7 +46,7 @@ export interface LegacyPassThroughOptions {
    *
    * @defaultValue `'build'`
    */
-  apply?: 'build' | 'serve'
+  apply?: 'build' | 'serve';
 
   /**
    * When `true`, logs each resolved import path to the console.
@@ -61,7 +61,7 @@ export interface LegacyPassThroughOptions {
    * [vite-legacy-pass-through] Resolving: lib-legacy/utils/format
    * ```
    */
-  showLog?: boolean
+  showLog?: boolean;
 }
 
 /**
@@ -99,41 +99,63 @@ export interface LegacyPassThroughOptions {
  * ```
  */
 export const DEFAULT_EXCLUDE_EXTENSIONS = new Set([
-  '.css', '.scss', '.sass', '.less', '.styl',
-  '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp',
-  '.woff', '.woff2', '.ttf', '.eot',
-  '.json', '.html',
-])
+  '.css',
+  '.scss',
+  '.sass',
+  '.less',
+  '.styl',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.svg',
+  '.webp',
+  '.woff',
+  '.woff2',
+  '.ttf',
+  '.eot',
+  '.json',
+  '.html',
+]);
 
-export function legacyPassThrough({ libs, excludeExtensions, apply = 'build', showLog }: LegacyPassThroughOptions = { libs: [] }): Plugin {
-  const validLibs = libs.filter(lib => lib.trim() !== '')
+export function legacyPassThrough(
+  { libs, excludeExtensions, apply = 'build', showLog }: LegacyPassThroughOptions = { libs: [] },
+): Plugin {
+  const validLibs = libs.filter((lib) => lib.trim() !== '');
 
   if (!validLibs.length) {
-    throw new Error('The "libs" option must be a non-empty array for the legacyPassThrough plugin.')
+    throw new Error(
+      'The "libs" option must be a non-empty array for the legacyPassThrough plugin.',
+    );
   }
 
-  const prefixes = validLibs.map(lib => `${lib}/`)
-  const skipExtensions = excludeExtensions ? new Set(excludeExtensions) : DEFAULT_EXCLUDE_EXTENSIONS
+  const prefixes = validLibs.map((lib) => `${lib}/`);
+  const skipExtensions = excludeExtensions
+    ? new Set(excludeExtensions)
+    : DEFAULT_EXCLUDE_EXTENSIONS;
 
   return {
     name: 'vite-legacy-pass-through',
     enforce: 'pre',
     apply,
     resolveId(source) {
-      const dotIndex = source.lastIndexOf('.')
+      const dotIndex = source.lastIndexOf('.');
+
       if (dotIndex !== -1 && skipExtensions.has(source.slice(dotIndex))) {
-        return null
+        return null;
       }
 
-      if (prefixes.some(prefix => source.startsWith(prefix))) {
+      if (prefixes.some((prefix) => source.startsWith(prefix))) {
         if (showLog) {
-          console.log(`[vite-legacy-pass-through] Resolving: ${source}`)
+          console.log(`[vite-legacy-pass-through] Resolving: ${source}`);
         }
-        return { id: source, external: true }
+
+        return { id: source, external: true };
       }
-      return null
+
+      return null;
     },
-  }
+  };
 }
 
-export default legacyPassThrough
+export default legacyPassThrough;
